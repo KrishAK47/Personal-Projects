@@ -1,0 +1,38 @@
+                             OLS Regression Results                             
+================================================================================
+Dep. Variable:     converted_to_premium   R-squared:                       0.005
+Model:                              OLS   Adj. R-squared:                  0.005
+Method:                   Least Squares   F-statistic:                     27.91
+Date:                  Tue, 04 Aug 2026   Prob (F-statistic):           3.64e-23
+Time:                          12:08:06   Log-Likelihood:                -5277.6
+No. Observations:                 25000   AIC:                         1.057e+04
+Df Residuals:                     24995   BIC:                         1.061e+04
+Df Model:                             4                                         
+Covariance Type:                    HC1                                         
+==========================================================================================
+                             coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------------------
+Intercept                  0.0908      0.004     24.048      0.000       0.083       0.098
+C(segment)[T.retained]    -0.0139      0.004     -3.453      0.001      -0.022      -0.006
+treated                    0.0017      0.005      0.328      0.743      -0.008       0.012
+post                       0.0021      0.005      0.426      0.670      -0.008       0.012
+treated_x_post             0.0451      0.008      5.965      0.000       0.030       0.060
+==============================================================================
+Omnibus:                    12755.333   Durbin-Watson:                   2.004
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):            56282.659
+Skew:                           2.651   Prob(JB):                         0.00
+Kurtosis:                       8.090   Cond. No.                         7.02
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity robust (HC1)
+
+
+DiD estimate: the redesigned upsell flow is associated with a +4.5% change in free->premium conversion for the treatment group, beyond the control group's trend (statistically significant, p=0.0000).
+Read alongside the raw group means below to sanity-check the regression.
+
+Raw group means:
+period         post       pre
+group                        
+control    0.088650  0.086584
+treatment  0.135661  0.088269

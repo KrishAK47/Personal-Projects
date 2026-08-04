@@ -1,0 +1,13 @@
+channel,segment,traffic,signups,starts,traffic_to_signup,signup_to_start,traffic_to_start
+organic,retained,54519,3928,2756,0.072,0.7016,0.0506
+organic,net_new,95840,6782,4668,0.0708,0.6883,0.0487
+affiliate,retained,26525,1580,1059,0.0596,0.6703,0.0399
+affiliate,net_new,48880,2908,1919,0.0595,0.6599,0.0393
+paid_search,net_new,147606,7595,4590,0.0515,0.6043,0.0311
+paid_search,retained,79303,4023,2412,0.0507,0.5996,0.0304
+paid_social,net_new,113817,4043,2235,0.0355,0.5528,0.0196
+paid_social,retained,63488,2191,1177,0.0345,0.5372,0.0185
+video,retained,44654,1258,653,0.0282,0.5191,0.0146
+video,net_new,78796,2202,1120,0.0279,0.5086,0.0142
+display,retained,105033,1828,879,0.0174,0.4809,0.0084
+display,net_new,189398,3410,1584,0.018,0.4645,0.0084
