@@ -1,6 +1,6 @@
 # Shwetha Anilkumar Krishnan — Personal Projects
 
-Senior Data Scientist with 8+ years building predictive models, causal inference frameworks, and applied GenAI systems across enterprise CRM (Accenture), compliance and document intelligence (ISN), and fintech growth analytics (Intuit). I work at the intersection of advanced analytics, machine learning, and business strategy — translating data science into decisions that clients and senior leaders can act on. AI-native: Claude Code and Cursor are core tools in how I build, not just what I build.
+Senior Data Scientist with 8+ years building predictive models, causal inference frameworks, and applied GenAI systems across enterprise CRM (Accenture), compliance and document intelligence (ISN), and fintech growth analytics (Intuit). I work at the intersection of advanced analytics, machine learning, and business strategy — translating data science into decisions that clients and senior leaders can act on. AI-native tools: Claude Code and Cursor
 
 This repo collects hands-on projects that mirror that toolkit outside of proprietary employer work — causal inference, predictive modeling, NLP/LLM engineering, and applied GenAI agents.
 
