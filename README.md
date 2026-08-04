@@ -4,7 +4,7 @@ Senior Data Scientist with 8+ years building predictive models, causal inference
 
 This repo collects hands-on projects that mirror that toolkit outside of proprietary employer work — causal inference, predictive modeling, NLP/LLM engineering, and applied GenAI agents.
 
-📧 shwethaanilkumarkrishnan@gmail.com | 🔗 [linkedin.com/in/shwethakrishnan](https://linkedin.com/in/shwethakrishnan) | 📍 Toronto, ON — relocating to Texas | Authorized to work in the U.S. on TN visa
+ 🔗 [linkedin.com/in/shwethakrishnan](https://linkedin.com/in/shwethakrishnan) | 📍 Toronto, ON| Authorized to work in the U.S. on TN visa
 
 ## Background
 
