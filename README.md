@@ -8,7 +8,7 @@ This repo collects hands-on projects that mirror that toolkit outside of proprie
 
 ## Background
 
-- **Intuit** (2021–2026), Senior Data Scientist, TurboTax Product GTM — owned top-of-funnel measurement across paid channels, applied difference-in-differences to uncover a forced-conversion trigger in an upsell flow, built a GenAI LLM agent (Cursor + Claude Code) giving senior leadership self-serve natural-language analytics, and built predictive models for churn, upsell, and segmentation.
+- **Intuit** (2021–2026), Senior Data Scientist, TurboTax Product GTM — owned full funnel measurement across Assisted products , applied experimentation, diff-in-diff, causal studies  to uncover a forced-conversion trigger in an upsell flow, built a GenAI LLM agent poc providing self-serve natural-language analytics, and built predictive models for churn, upsell, and segmentation.
 - **ISN** (2018–2021), Advanced Data Analyst — designed and built an end-to-end OCR/NLP pipeline (Tesseract, BERT, Python) automating OSHA compliance document review for oil & gas contractors — cut a 2-3 week manual process to 40 minutes, contributing to $1.8M in ROI savings across 14+ NLP products.
 - **Accenture** (2011–2017), Application Development Senior Analyst — delivered CRM solutions (Siebel, Salesforce) across Telecom, Utilities, and Medical Device clients across 3 continents; led a Siebel-to-Salesforce data migration and mentored a 6-person team.
 - **M.S., Management Information Systems (Data Science)**, Oklahoma State University
