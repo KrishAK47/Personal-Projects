@@ -1,0 +1,28 @@
+{
+  "model_name": "XGBoost",
+  "best_threshold": 0.5704605579376221,
+  "logistic_regression": {
+    "model": "Logistic Regression",
+    "precision_default": 0.5494590417310664,
+    "recall_default": 0.797979797979798,
+    "f1_default": 0.6508009153318077,
+    "roc_auc": 0.8794312877325585,
+    "pr_auc": 0.7187927634084192
+  },
+  "xgboost_default_threshold": {
+    "model": "XGBoost (threshold=0.50)",
+    "precision_default": 0.5551948051948052,
+    "recall_default": 0.7676767676767676,
+    "f1_default": 0.6443711728685821,
+    "roc_auc": 0.8728307520425976,
+    "pr_auc": 0.6992165804099326
+  },
+  "xgboost_tuned_threshold": {
+    "model": "XGBoost (tuned threshold=0.57)",
+    "precision_default": 0.6007462686567164,
+    "recall_default": 0.7227833894500562,
+    "f1_default": 0.6561385634233317,
+    "roc_auc": 0.8728307520425976,
+    "pr_auc": 0.6992165804099326
+  }
+}
