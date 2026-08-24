@@ -27,6 +27,7 @@ This repo collects hands-on projects that mirror that toolkit outside of proprie
 | Project | What it demonstrates |
 |---|---|
 | [GTM Funnel Analytics + Claude Self-Serve Agent](./GTM%20Funnel%20Analytics%20+%20Claude%20Self-Serve%20Agent) | Channel funnel analysis, a difference-in-differences regression isolating a causal product effect from a naive before/after read, a gradient-boosted upgrade-propensity model, and a Claude tool-use agent that answers stakeholder questions in plain English against real computed results. |
+| [Risk Modelling — Banking Loan Default Prediction](./Risk%20modelling) | A credit-risk case study on a synthetic loan portfolio: Logistic Regression vs. XGBoost to flag defaulters, evaluated on precision/recall/F1 (not just accuracy) with threshold tuning for the class-imbalance tradeoff, plus SHAP explainability (global + per-customer) to make the model's decisions auditable for underwriting. |
 
 ### In progress / planned
 
