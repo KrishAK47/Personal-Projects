@@ -28,6 +28,7 @@ This repo collects hands-on projects that mirror that toolkit outside of proprie
 |---|---|
 | [GTM Funnel Analytics + Claude Self-Serve Agent](./GTM%20Funnel%20Analytics%20+%20Claude%20Self-Serve%20Agent) | Channel funnel analysis, a difference-in-differences regression isolating a causal product effect from a naive before/after read, a gradient-boosted upgrade-propensity model, and a Claude tool-use agent that answers stakeholder questions in plain English against real computed results. |
 | [Risk Modelling — Banking Loan Default Prediction](./Risk%20modelling) | A credit-risk case study on a synthetic loan portfolio: Logistic Regression vs. XGBoost to flag defaulters, evaluated on precision/recall/F1 (not just accuracy) with threshold tuning for the class-imbalance tradeoff, plus SHAP explainability (global + per-customer) to make the model's decisions auditable for underwriting. |
+| [Contractor Front Office Agent](./Contractor-Front-Office-Agent) | A Claude-powered virtual receptionist for small home services businesses (plumbing, roofing, electrical, HVAC): a LangChain tool-calling agent with 5 tools that runs customer intake one question at a time, checks a CSV schedule, books jobs, flags emergencies and VIP repeat clients, and drafts copy-paste SMS/email confirmations — with a Streamlit chat UI and contractor dashboard. |
 
 ### In progress / planned
 

@@ -61,8 +61,8 @@ Jobs are saved with status `pending_confirmation`. Once you've actually sent the
 Requires Python 3.10+ and an [Anthropic API key](https://console.anthropic.com/).
 
 ```bash
-git clone https://github.com/KrishAK47/contractor-front-office-agent.git
-cd contractor-front-office-agent
+git clone https://github.com/KrishAK47/Personal-Projects.git
+cd Personal-Projects/Contractor-Front-Office-Agent
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -87,7 +87,7 @@ Try a returning VIP customer by giving the name **Maria Lopez** / phone **416-55
 ## Deploy to Streamlit Community Cloud
 
 1. Go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub, and click **Create app**.
-2. Pick this repo, branch `main`, main file `app.py`.
+2. Pick the `KrishAK47/Personal-Projects` repo, branch `main`, main file path `Contractor-Front-Office-Agent/app.py`.
 3. Under **Advanced settings → Secrets**, add:
    ```toml
    ANTHROPIC_API_KEY = "sk-ant-..."
