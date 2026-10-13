@@ -149,7 +149,27 @@ The agent isn't hard-coded to any trade — `job_type` is free text Claude fills
 5. **Customize the confirmation wording** in `generate_confirmation` in `tools.py` (add a deposit note, parking instructions, a review link, etc.).
 6. **Add new tools** (e.g. `quote_estimate`, `cancel_job`) by writing a `@tool` function in `tools.py` and adding it to `ALL_TOOLS` — the agent picks it up automatically.
 
-## Limitations
+## Roadmap to production
 
-- Single-user local app — CSV files aren't safe for concurrent writes.
-- The contractor types the customer's side; there's no live SMS/phone integration (yet). Twilio would be a natural next step.
+This is an MVP: it proves the agent flow end to end. Taking it to real contractors would need the following.
+
+**Must-haves before real customers**
+1. **Database, not CSVs**: Postgres (e.g. Supabase) with transactions, so two simultaneous bookings can't take the same slot and data survives restarts.
+2. **Per-business authentication**: real accounts (Auth0 / Supabase Auth) so each contractor only sees their own customers and jobs.
+3. **Privacy & compliance**: customer PII encrypted at rest, a privacy policy, data deletion on request, and PIPEDA / CASL compliance once texts and emails go out.
+4. **Secrets & cost controls**: keys in a secrets manager, API spend limits, and per-user rate limiting.
+
+**To be a real front office**
+5. **Customer-facing channels**: Twilio SMS/voice or a website chat widget, so customers talk to the agent directly instead of the contractor relaying.
+6. **Send confirmations**: email (Resend / SendGrid) and SMS (Twilio), plus day-before reminders, with the contractor approving each send.
+7. **Calendar sync**: Google / Outlook calendars instead of a fixed slot list, with travel time and multiple technicians.
+8. **Cancel & reschedule tools**: today the agent can only book.
+
+**Reliability & quality**
+9. **Input validation**: phone/email/address formats and service-area checks before saving.
+10. **Tests & evals**: unit tests for the tools, plus a suite of scripted conversations replayed against the agent on every prompt or model change to catch regressions (e.g. skipped intake steps).
+11. **Observability**: conversation and tool-call tracing (e.g. LangSmith), error tracking, and alerts on failed bookings.
+12. **Human handoff**: a "someone will call you back" path for complaints, complex quotes, or when the agent is unsure.
+13. **Production hosting**: move from Streamlit Community Cloud to Render / Railway / AWS, likely as a FastAPI backend + web front end once multiple businesses use it.
+
+**Later**: quotes and estimates, Stripe deposits, post-job review requests, multi-language support.
