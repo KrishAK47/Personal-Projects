@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
 
 import data_store as ds
 from tools import ALL_TOOLS
+
+load_dotenv(Path(__file__).parent / ".env")
 
 DEFAULT_MODEL = "claude-sonnet-4-6"
 MAX_TOOL_ROUNDS = 8

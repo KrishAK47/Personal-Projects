@@ -13,7 +13,7 @@ import data_store as ds
 from seed_data import ensure_data
 from tools import mark_confirmation_sent
 
-load_dotenv()
+load_dotenv(ds.DATA_DIR.parent / ".env")
 ensure_data()
 
 st.set_page_config(page_title="Front Office Agent", page_icon="🛠️", layout="wide")
@@ -113,7 +113,23 @@ def render_confirmation(conf: dict) -> None:
             st.toast(f"{conf['job_id']} marked as confirmed")
 
 
+def require_password() -> None:
+    """If APP_PASSWORD is set (e.g. in Streamlit Cloud secrets), gate the app behind it."""
+    password = os.getenv("APP_PASSWORD")
+    if not password or st.session_state.get("authenticated"):
+        return
+    st.title("🛠️ Front Office Agent")
+    entered = st.text_input("Password", type="password")
+    if entered == password:
+        st.session_state.authenticated = True
+        st.rerun()
+    elif entered:
+        st.error("Incorrect password.")
+    st.stop()
+
+
 def main() -> None:
+    require_password()
     render_dashboard()
 
     st.title("🛠️ Front Office Agent")
