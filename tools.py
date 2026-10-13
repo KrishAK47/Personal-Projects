@@ -282,7 +282,8 @@ def generate_confirmation(job_id: str) -> dict:
         f"Hi {first_name}, your {trade} appointment is confirmed for {when} at {job['address']}. "
         f"Our tech will call 30 mins before arrival. Questions? Call us at {phone}."
     )
-    email_subject = f"Appointment confirmed: {job['job_type']} on {when}"
+    slot_label = datetime.fromisoformat(f"{slot['date']}T{slot['time']}").strftime("%a %b %d, %I:%M%p")
+    email_subject = f"Appointment confirmed: {job['job_type']}, {slot_label.replace(' 0', ' ')}"
     email_body = (
         f"Hi {first_name},\n\n"
         f"Thanks for choosing {_business_name()}. Your appointment is booked:\n\n"
