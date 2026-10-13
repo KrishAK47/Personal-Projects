@@ -79,6 +79,7 @@ streamlit run app.py
 | `BUSINESS_NAME` | `our team` | Used in the email confirmation |
 | `BUSINESS_PHONE` | `[your number]` | Used in the SMS/email confirmation |
 | `APP_PASSWORD` | — | Optional. If set, the app asks for this password first |
+| `DEMO_MESSAGE_LIMIT` | — | Optional. Caps messages per visitor session and shows a demo banner |
 
 **Sample data**: if the schedule is missing or entirely in the past, the app regenerates it starting today. To reset everything manually: `python seed_data.py --reset` (or the **Reset sample data** button in the sidebar).
 
@@ -91,11 +92,14 @@ Try a returning VIP customer by giving the name **Maria Lopez** / phone **416-55
 3. Under **Advanced settings → Secrets**, add:
    ```toml
    ANTHROPIC_API_KEY = "sk-ant-..."
-   APP_PASSWORD = "choose-a-password"
+   APP_PASSWORD = "choose-a-password"   # or omit, and use DEMO_MESSAGE_LIMIT for an open demo
+   DEMO_MESSAGE_LIMIT = "30"
    BUSINESS_NAME = "Smith Home Services"
    BUSINESS_PHONE = "416-555-0100"
    ```
 4. Deploy. Streamlit exposes top-level secrets as environment variables, so no code changes are needed.
+
+For an open public demo, skip `APP_PASSWORD`, set `DEMO_MESSAGE_LIMIT`, consider `CLAUDE_MODEL = "claude-haiku-4-5"` for lower cost, and set a monthly spend limit in the Claude Console.
 
 Note: on Streamlit Cloud the CSV files reset whenever the app restarts, and all visitors share the same data. That's fine for a demo; use a real database for production.
 

@@ -19,6 +19,15 @@ ensure_data()
 st.set_page_config(page_title="Front Office Agent", page_icon="🛠️", layout="wide")
 
 GREETING = "Hi, thanks for reaching out! What can we help you with today?"
+MAX_MESSAGE_CHARS = 500
+
+
+def demo_message_limit() -> int:
+    """Messages allowed per browser session when DEMO_MESSAGE_LIMIT is set; 0 means unlimited."""
+    try:
+        return max(int(os.getenv("DEMO_MESSAGE_LIMIT", "0")), 0)
+    except ValueError:
+        return 0
 
 
 # ---------- Dashboard (sidebar) ----------
@@ -135,6 +144,13 @@ def main() -> None:
     st.title("🛠️ Front Office Agent")
     st.caption("Virtual receptionist for your home services business — type as the customer.")
 
+    limit = demo_message_limit()
+    if limit:
+        st.info(
+            "**Demo mode** — please use made-up names, phones and addresses. "
+            "Sample data resets regularly. Try a returning VIP: *Maria Lopez, 416-555-0198*."
+        )
+
     if not os.getenv("ANTHROPIC_API_KEY"):
         st.error("Set ANTHROPIC_API_KEY in a `.env` file (see `.env.example`) and restart.")
         st.stop()
@@ -157,7 +173,17 @@ def main() -> None:
     for conf in st.session_state.confirmations:
         render_confirmation(conf)
 
-    if prompt := st.chat_input("Customer message..."):
+    # Counted per session and not reset by "New conversation", so the cap can't be bypassed that way.
+    used = st.session_state.setdefault("messages_used", 0)
+    if limit and used >= limit:
+        st.warning("Demo limit reached — thanks for trying it! Refresh the page to start a new demo.")
+        return
+    if limit:
+        left = limit - used
+        st.caption(f"{left} demo message{'' if left == 1 else 's'} left")
+
+    if prompt := st.chat_input("Customer message...", max_chars=MAX_MESSAGE_CHARS):
+        st.session_state.messages_used += 1
         st.session_state.display.append({"role": "user", "content": prompt})
         with st.spinner("Thinking..."):
             try:
