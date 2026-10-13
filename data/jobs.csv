@@ -1,0 +1,4 @@
+job_id,customer_name,address,phone,email,job_type,urgency,description,slot_id,status,created_date,notes
+J1001,Maria Lopez,"88 Queen St W, Toronto",416-555-0198,maria.lopez@example.com,HVAC service,this week,Annual furnace tune-up before winter.,S002,confirmed,2026-10-12,VIP customer
+J1002,Priya Patel,"450 Bloor St E, Toronto",647-555-0177,priya.p@example.com,Electrical fault,this week,Breaker trips when the dryer runs.,S005,pending_confirmation,2026-10-12,
+J1003,David Chen,"12 Elm Ave, Mississauga",905-555-0142,dchen@example.com,Roof repair,flexible,A few shingles missing after the storm.,S010,confirmed,2026-10-12,Crew needed: 2-person crew + ladder truck
