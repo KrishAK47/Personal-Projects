@@ -1,6 +1,6 @@
 job_id,customer_name,address,phone,email,job_type,urgency,description,slot_id,status,created_date,notes
-J1001,Maria Lopez,"88 Queen St W, Toronto",416-555-0198,maria.lopez@example.com,HVAC service,this week,Annual furnace tune-up before winter.,S002,confirmed,2026-10-22,VIP customer
-J1002,Priya Patel,"450 Bloor St E, Toronto",647-555-0177,priya.p@example.com,Electrical fault,this week,Breaker trips when the dryer runs.,S005,pending_confirmation,2026-10-12,
-J1003,David Chen,"12 Elm Ave, Mississauga",905-555-0142,dchen@example.com,Roof repair,flexible,A few shingles missing after the storm.,S010,confirmed,2026-10-12,Crew needed: 2-person crew + ladder truck
-J1004,David Chen,"12 Elm Ave, Mississauga",905-555-0142,dchen@example.com,Roof repair,flexible,A few shingles missing after the storm.,S010,confirmed,2026-10-12,Crew needed: 2-person crew + ladder truck
-J1005,Katherine James,"12 Elm Ave, Mississauga",905-555-0142,kj@example.com,Patio Door issue,this week,PAtio door and bathroom door issues .,S010,confirmed,2026-10-21,Crew needed: 1-person crew 
+J1001,Maria Lopez,"88 Queen St W, Toronto",416-555-0198,maria.lopez@example.com,HVAC service,this week,Annual furnace tune-up before winter.,S001,confirmed,2026-10-19,VIP customer
+J1002,Sarah Thompson,"9 Maple Cres, Toronto",416-555-0123,sarah.t@example.com,Plumbing,emergency,"Burst pipe in the basement, water spreading.",S003,pending_confirmation,2026-10-19,EMERGENCY; Materials: bring pipe repair kit + shop vac
+J1003,Katherine James,"27 Lakeshore Rd, Oakville",289-555-0163,kj@example.com,Patio door repair,this week,Patio door and bathroom door sticking.,S005,pending_confirmation,2026-10-19,Crew needed: 1-person crew
+J1004,Priya Patel,"450 Bloor St E, Toronto",647-555-0177,priya.p@example.com,Electrical fault,this week,Breaker trips when the dryer runs.,S007,pending_confirmation,2026-10-19,
+J1005,David Chen,"12 Elm Ave, Mississauga",905-555-0142,dchen@example.com,Roof repair,flexible,A few shingles missing after the storm.,S014,confirmed,2026-10-19,Crew needed: 2-person crew + ladder truck

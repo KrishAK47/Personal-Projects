@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import os
 import re
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -97,4 +99,5 @@ def format_phone(phone: str) -> str:
 
 
 def now() -> datetime:
-    return datetime.now()
+    """Current local time for the business (naive). Cloud servers run on UTC, so use TIMEZONE."""
+    return datetime.now(ZoneInfo(os.getenv("TIMEZONE", "America/Toronto"))).replace(tzinfo=None)

@@ -1,6 +1,6 @@
 customer_id,name,phone,email,address,total_jobs,last_job_date,notes
-C001,Maria Lopez,416-555-0198,maria.lopez@example.com,"88 Queen St W, Toronto",4,2026-09-22,Prefers morning appointments. Has a dog.
-C002,David Chen,905-555-0142,dchen@example.com,"12 Elm Ave, Mississauga",1,2026-07-15,
-C003,Priya Patel,647-555-0177,priya.p@example.com,"450 Bloor St E, Toronto",2,2026-08-29,Side door entrance,
-C004,Suchita Banswani,647-551-0177,suchi.bp@example.com,"754 Bloor St E, Toronto",3,2026-08-29,Patio door not closing.
-C005,Katherine James ,647-551-0177,suchi.bp@example.com,"754 Bloor St E, Toronto",1,N/A,Patio door not closing.
+C001,Maria Lopez,416-555-0198,maria.lopez@example.com,"88 Queen St W, Toronto",4,2026-09-29,Prefers morning appointments. Has a dog.
+C002,David Chen,905-555-0142,dchen@example.com,"12 Elm Ave, Mississauga",1,2026-07-22,
+C003,Priya Patel,647-555-0177,priya.p@example.com,"450 Bloor St E, Toronto",2,2026-09-05,Side door entrance.
+C004,Sarah Thompson,416-555-0123,sarah.t@example.com,"9 Maple Cres, Toronto",1,2026-10-20,
+C005,Katherine James,289-555-0163,kj@example.com,"27 Lakeshore Rd, Oakville",1,2026-10-20,

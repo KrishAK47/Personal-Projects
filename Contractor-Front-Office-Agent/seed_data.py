@@ -20,16 +20,17 @@ WORKDAYS = 10
 
 
 def _workdays(start: date, count: int) -> list[date]:
+    """Today (even on a weekend, so the demo always has a "today") plus the following weekdays."""
     days, d = [], start
     while len(days) < count:
-        if d.weekday() < 5:
+        if d == start or d.weekday() < 5:
             days.append(d)
         d += timedelta(days=1)
     return days
 
 
 def build_sample_data(today: date | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    today = today or date.today()
+    today = today or ds.now().date()
     days = _workdays(today, WORKDAYS)
 
     schedule = pd.DataFrame(
@@ -57,18 +58,27 @@ def build_sample_data(today: date | None = None) -> tuple[pd.DataFrame, pd.DataF
             ["C003", "Priya Patel", "647-555-0177", "priya.p@example.com",
              "450 Bloor St E, Toronto", "2", (today - timedelta(days=45)).isoformat(),
              "Side door entrance."],
+            ["C004", "Sarah Thompson", "416-555-0123", "sarah.t@example.com",
+             "9 Maple Cres, Toronto", "1", today.isoformat(), ""],
+            ["C005", "Katherine James", "289-555-0163", "kj@example.com",
+             "27 Lakeshore Rd, Oakville", "1", today.isoformat(), ""],
         ],
         columns=ds.CUSTOMERS_COLUMNS,
     )
 
-    # Pre-book a few slots so the schedule looks realistic.
+    # Pre-booked jobs so the dashboard has something to show: 2 today (1 emergency),
+    # 3 awaiting confirmation. Slot index = day * 4 + time (0=9am, 1=11am, 2=2pm, 3=4pm).
     bookings = [
         # (job_id, customer_row, slot_index, job_type, urgency, description, status, notes)
-        ("J1001", 0, 1, "HVAC service", "this week", "Annual furnace tune-up before winter.",
+        ("J1001", 0, 0, "HVAC service", "this week", "Annual furnace tune-up before winter.",
          "confirmed", "VIP customer"),
-        ("J1002", 2, 4, "Electrical fault", "this week", "Breaker trips when the dryer runs.",
+        ("J1002", 3, 2, "Plumbing", "emergency", "Burst pipe in the basement, water spreading.",
+         "pending_confirmation", "EMERGENCY; Materials: bring pipe repair kit + shop vac"),
+        ("J1003", 4, 4, "Patio door repair", "this week", "Patio door and bathroom door sticking.",
+         "pending_confirmation", "Crew needed: 1-person crew"),
+        ("J1004", 2, 6, "Electrical fault", "this week", "Breaker trips when the dryer runs.",
          "pending_confirmation", ""),
-        ("J1003", 1, 9, "Roof repair", "flexible", "A few shingles missing after the storm.",
+        ("J1005", 1, 13, "Roof repair", "flexible", "A few shingles missing after the storm.",
          "confirmed", "Crew needed: 2-person crew + ladder truck"),
     ]
     jobs = []
@@ -98,10 +108,11 @@ def seed(reset: bool = False) -> None:
 
 
 def ensure_data() -> None:
-    """Seed missing files, and refresh the schedule if every slot is in the past."""
+    """Seed missing files, and regenerate the sample data once it no longer starts today.
+    This keeps the demo dashboard current; it means data resets once a day."""
     seed(reset=False)
     schedule = ds.load_schedule()
-    if schedule.empty or schedule["date"].max() < date.today().isoformat():
+    if schedule.empty or schedule["date"].min() < ds.now().date().isoformat():
         seed(reset=True)
 
 
