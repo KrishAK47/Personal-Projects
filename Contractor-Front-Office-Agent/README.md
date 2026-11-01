@@ -104,6 +104,27 @@ For an open public demo, skip `APP_PASSWORD`, set `DEMO_MESSAGE_LIMIT`, consider
 
 Note: on Streamlit Cloud the CSV files reset whenever the app restarts, and all visitors share the same data. That's fine for a demo; use a real database for production.
 
+## Tests and evals
+
+```bash
+pip install -r requirements-dev.txt
+pytest              # 31 unit tests for the tools and sample data: fast, free, no API key
+pytest -m eval      # conversation evals against the real agent (needs ANTHROPIC_API_KEY, ~10-20 cents)
+```
+
+**Unit tests** (`tests/test_tools.py`) run each tool against a fresh copy of the sample data with a frozen clock: customer lookup and de-duplication, emergency slot priority, past slots never offered, double-booking refused, VIP and crew flags, confirmation text, and sample-data consistency.
+
+**Conversation evals** (`tests/evals/`) have Claude play a customer persona and talk to the real agent, then check what the agent *did*, not just what it said:
+
+| Scenario | Checks |
+|---|---|
+| New customer, active leak | Flagged as emergency, all details saved (including email), booked slot was one the tool offered, read back before booking, one question at a time |
+| Returning VIP (Maria Lopez) | History looked up, greeted by name, no duplicate customer created |
+| Flexible, prefers a later date | Preferred date passed to the availability tool and respected |
+| Customer declines | Nothing booked |
+
+Both run in GitHub Actions on every push (`.github/workflows/contractor-agent.yml`). The evals job needs an `ANTHROPIC_API_KEY` repository secret and is skipped without one.
+
 ## Example conversation
 
 ```
@@ -172,7 +193,7 @@ This is an MVP: it proves the agent flow end to end. Taking it to real contracto
 
 **Reliability & quality**
 9. **Input validation**: phone/email/address formats and service-area checks before saving.
-10. **Tests & evals**: unit tests for the tools, plus a suite of scripted conversations replayed against the agent on every prompt or model change to catch regressions (e.g. skipped intake steps).
+10. ~~**Tests & evals**~~ ✅ Done: 31 unit tests + 4 conversation evals in CI (see [Tests and evals](#tests-and-evals)).
 11. **Observability**: conversation and tool-call tracing (e.g. LangSmith), error tracking, and alerts on failed bookings.
 12. **Human handoff**: a "someone will call you back" path for complaints, complex quotes, or when the agent is unsure.
 13. **Production hosting**: move from Streamlit Community Cloud to Render / Railway / AWS, likely as a FastAPI backend + web front end once multiple businesses use it.
