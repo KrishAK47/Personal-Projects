@@ -13,6 +13,7 @@ from datetime import date, timedelta
 import pandas as pd
 
 import data_store as ds
+import store
 
 SLOT_TIMES = ["09:00", "11:00", "14:00", "16:00"]
 SLOT_HOURS = "2"
@@ -87,7 +88,7 @@ def build_sample_data(today: date | None = None) -> tuple[pd.DataFrame, pd.DataF
         slot_id = schedule.at[slot_idx, "slot_id"]
         schedule.loc[slot_idx, ["status", "job_id"]] = ["booked", job_id]
         jobs.append([
-            job_id, c["name"], c["address"], c["phone"], c["email"], job_type, urgency,
+            job_id, c["customer_id"], c["name"], c["address"], c["phone"], c["email"], job_type, urgency,
             desc, slot_id, status, (today - timedelta(days=1)).isoformat(), notes,
         ])
     jobs_df = pd.DataFrame(jobs, columns=ds.JOBS_COLUMNS)
@@ -96,25 +97,35 @@ def build_sample_data(today: date | None = None) -> tuple[pd.DataFrame, pd.DataF
 
 
 def seed(reset: bool = False) -> None:
-    schedule, jobs, customers = build_sample_data()
-    for df, path, save in [
-        (schedule, ds.SCHEDULE_CSV, ds.save_schedule),
-        (jobs, ds.JOBS_CSV, ds.save_jobs),
-        (customers, ds.CUSTOMERS_CSV, ds.save_customers),
-    ]:
-        if reset or not path.exists():
-            save(df)
-            print(f"Wrote {path.relative_to(ds.DATA_DIR.parent)} ({len(df)} rows)")
+    """Load fresh sample data into the active store (CSV or Supabase)."""
+    db = store.get_store()
+    if reset or db.is_empty():
+        schedule, jobs, customers = build_sample_data()
+        db.replace_all(schedule, jobs, customers)
+        print(f"Loaded sample data into {db.name}: {len(schedule)} slots, "
+              f"{len(jobs)} jobs, {len(customers)} customers")
+
+
+_checked_on: str = ""
 
 
 def ensure_data() -> None:
-    """Seed missing files, and regenerate the sample data once it no longer starts today.
-    This keeps the demo dashboard current; it means data resets once a day."""
+    """Seed if empty, and regenerate the sample data once it no longer starts today.
+    This keeps the demo dashboard current; it means data resets once a day.
+    Checked at most once per day per process, so it costs one query a day."""
+    global _checked_on
+    today = ds.now().date().isoformat()
+    if _checked_on == today:
+        return
     seed(reset=False)
-    schedule = ds.load_schedule()
-    if schedule.empty or schedule["date"].min() < ds.now().date().isoformat():
+    slots = store.get_store().slots()
+    if not slots or slots[0]["date"] < today:
         seed(reset=True)
+    _checked_on = today
 
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+
+    load_dotenv(ds.DATA_DIR.parent / ".env")
     seed(reset="--reset" in sys.argv)

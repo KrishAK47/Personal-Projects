@@ -17,7 +17,7 @@ CUSTOMERS_CSV = DATA_DIR / "customers.csv"
 
 SCHEDULE_COLUMNS = ["slot_id", "date", "time", "duration_hours", "status", "job_id"]
 JOBS_COLUMNS = [
-    "job_id", "customer_name", "address", "phone", "email", "job_type", "urgency",
+    "job_id", "customer_id", "customer_name", "address", "phone", "email", "job_type", "urgency",
     "description", "slot_id", "status", "created_date", "notes",
 ]
 CUSTOMERS_COLUMNS = [

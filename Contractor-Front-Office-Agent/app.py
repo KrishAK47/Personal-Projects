@@ -10,6 +10,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 import data_store as ds
+import store
 from seed_data import ensure_data
 from tools import mark_confirmation_sent
 
@@ -32,9 +33,17 @@ def demo_message_limit() -> int:
 
 # ---------- Dashboard (sidebar) ----------
 
+def _load_jobs() -> pd.DataFrame:
+    return pd.DataFrame(store.get_store().jobs(), columns=ds.JOBS_COLUMNS)
+
+
+def _load_slots(since_date: str = "") -> pd.DataFrame:
+    return pd.DataFrame(store.get_store().slots(since_date), columns=ds.SCHEDULE_COLUMNS)
+
+
 def _jobs_with_slots() -> pd.DataFrame:
-    jobs = ds.load_jobs()
-    schedule = ds.load_schedule()[["slot_id", "date", "time"]]
+    jobs = _load_jobs()
+    schedule = _load_slots()[["slot_id", "date", "time"]]
     merged = jobs.merge(schedule, on="slot_id", how="left")
     return merged.sort_values(["date", "time"])
 
@@ -82,11 +91,11 @@ def render_dashboard() -> None:
                 st.rerun()
 
     with st.sidebar.expander("This week's schedule"):
-        schedule = ds.load_schedule()
+        schedule = _load_slots(today.isoformat())
         week_end = (today + timedelta(days=6)).isoformat()
         week = schedule[(schedule["date"] >= today.isoformat()) & (schedule["date"] <= week_end)]
         week = week.merge(
-            ds.load_jobs()[["job_id", "customer_name", "job_type"]], on="job_id", how="left"
+            jobs[["job_id", "customer_name", "job_type"]], on="job_id", how="left"
         ).fillna("")
         st.dataframe(
             week[["date", "time", "status", "customer_name", "job_type"]],
@@ -94,6 +103,7 @@ def render_dashboard() -> None:
         )
 
     st.sidebar.divider()
+    st.sidebar.caption(f"Storage: {store.get_store().name}")
     if st.sidebar.button("🔄 Reset sample data"):
         from seed_data import seed
 

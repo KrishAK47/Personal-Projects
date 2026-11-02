@@ -15,6 +15,7 @@ load_dotenv(ROOT / ".env")  # lets `pytest -m eval` pick up ANTHROPIC_API_KEY lo
 
 import data_store as ds  # noqa: E402
 import seed_data  # noqa: E402
+import store  # noqa: E402
 
 # A Tuesday morning, before the first slot of the day.
 FROZEN_NOW = datetime(2026, 10, 20, 8, 0)
@@ -37,7 +38,9 @@ def clock(monkeypatch):
 
 @pytest.fixture
 def data_dir(tmp_path, monkeypatch, clock):
-    """Point the data store at a temp folder seeded with fresh sample data."""
+    """Use CSV storage in a temp folder seeded with fresh sample data (never the real database)."""
+    monkeypatch.setattr(store, "get_store", lambda: store.CsvStore())
+    monkeypatch.setattr(seed_data, "_checked_on", "")
     paths = {
         "SCHEDULE_CSV": tmp_path / "schedule.csv",
         "JOBS_CSV": tmp_path / "jobs.csv",

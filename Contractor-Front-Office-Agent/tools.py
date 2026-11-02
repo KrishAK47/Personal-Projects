@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 from datetime import date, datetime, timedelta
 
-import pandas as pd
 from langchain_core.tools import tool
 
 import data_store as ds
+import store
 
 VIP_JOB_COUNT = 3
 URGENCY_LEVELS = ("emergency", "this week", "flexible")
@@ -39,27 +39,11 @@ def _normalize_urgency(urgency: str) -> str:
     return "flexible"
 
 
-def _customer_record(row: pd.Series) -> dict:
-    record = row.to_dict()
-    record["is_vip"] = int(record.get("total_jobs") or 0) >= VIP_JOB_COUNT
-    return record
+def _customer_record(customer: dict) -> dict:
+    return {**customer, "is_vip": int(customer.get("total_jobs") or 0) >= VIP_JOB_COUNT}
 
 
-def _find_customer(customers: pd.DataFrame, phone: str = "", name: str = "") -> int | None:
-    """Index of a matching customer, by phone first, then exact (case-insensitive) name."""
-    digits = ds.normalize_phone(phone)
-    if digits:
-        match = customers.index[customers["phone"].map(ds.normalize_phone) == digits]
-        if len(match):
-            return match[0]
-    if name.strip():
-        match = customers.index[customers["name"].str.strip().str.lower() == name.strip().lower()]
-        if len(match):
-            return match[0]
-    return None
-
-
-def _slot_datetime(slot: pd.Series) -> datetime:
+def _slot_datetime(slot: dict) -> datetime:
     return datetime.fromisoformat(f"{slot['date']}T{slot['time']}")
 
 
@@ -82,31 +66,27 @@ def collect_customer_info(name: str, phone: str, address: str = "", email: str =
     """Look up a customer by phone (or name) and return their record, creating a new one if they
     are not on file. Call this as soon as you have the customer's name and phone number. Call it
     again later with address/email to fill in missing details on the record."""
-    customers = ds.load_customers()
-    idx = _find_customer(customers, phone=phone, name=name)
+    db = store.get_store()
+    existing = db.find_customer(phone=phone, name=name)
 
-    if idx is not None:
+    if existing:
         # Fill in any blanks with the new info, but never overwrite what's on file.
-        for col, value in (("address", address), ("email", email), ("phone", ds.format_phone(phone))):
-            if value and not customers.at[idx, col]:
-                customers.at[idx, col] = value.strip()
-        ds.save_customers(customers)
-        return {"status": "existing_customer", "customer": _customer_record(customers.loc[idx])}
+        updates = {
+            col: value.strip()
+            for col, value in (("address", address), ("email", email), ("phone", ds.format_phone(phone)))
+            if value and value.strip() and not existing[col]
+        }
+        if updates:
+            existing = db.update_customer(existing["customer_id"], updates)
+        return {"status": "existing_customer", "customer": _customer_record(existing)}
 
-    customer_id = ds.next_id(customers, "customer_id", "C", 3)
-    new = {
-        "customer_id": customer_id,
-        "name": name.strip().title() if name.islower() else name.strip(),
-        "phone": ds.format_phone(phone),
-        "email": email.strip(),
-        "address": address.strip(),
-        "total_jobs": "0",
-        "last_job_date": "",
-        "notes": "",
-    }
-    customers = pd.concat([customers, pd.DataFrame([new])], ignore_index=True)
-    ds.save_customers(customers)
-    return {"status": "new_customer", "customer": {**new, "is_vip": False}}
+    new = db.create_customer(
+        name=name.strip().title() if name.islower() else name.strip(),
+        phone=ds.format_phone(phone),
+        email=email.strip(),
+        address=address.strip(),
+    )
+    return {"status": "new_customer", "customer": _customer_record(new)}
 
 
 @tool
@@ -115,35 +95,32 @@ def check_availability(urgency: str, preferred_date: str = "") -> dict:
     urgency: 'emergency', 'this week' or 'flexible'. Emergencies get the very next open slots.
     preferred_date: optional YYYY-MM-DD; non-emergency searches start from this date."""
     level = _normalize_urgency(urgency)
-    schedule = ds.load_schedule()
-    open_slots = schedule[schedule["status"] == "available"].copy()
-    if open_slots.empty:
+    now = ds.now()
+    open_slots = [
+        s for s in store.get_store().slots(since_date=now.date().isoformat())
+        if s["status"] == "available" and _slot_datetime(s) > now
+    ]
+    if not open_slots:
         return {"urgency": level, "slots": [], "message": "No open slots on the schedule."}
 
-    open_slots["start"] = open_slots.apply(_slot_datetime, axis=1)
-    open_slots = open_slots[open_slots["start"] > ds.now()].sort_values("start")
-
-    start_from = None
     if preferred_date and level != "emergency":
         try:
-            start_from = date.fromisoformat(preferred_date.strip())
+            start_from = date.fromisoformat(preferred_date.strip()).isoformat()
         except ValueError:
-            start_from = None
-    if start_from:
-        later = open_slots[open_slots["start"].dt.date >= start_from]
-        if not later.empty:
+            start_from = ""
+        later = [s for s in open_slots if s["date"] >= start_from] if start_from else []
+        if later:
             open_slots = later
 
-    picks = open_slots.head(3)
     slots = [
         {
             "slot_id": s["slot_id"],
             "date": s["date"],
             "time": s["time"],
             "duration_hours": s["duration_hours"],
-            "display": f"{_friendly_day(s['start'].date())} at {_friendly_time(s['time'])}",
+            "display": f"{_friendly_day(date.fromisoformat(s['date']))} at {_friendly_time(s['time'])}",
         }
-        for _, s in picks.iterrows()
+        for s in open_slots[:3]
     ]
     result = {"urgency": level, "slots": slots}
     if level == "emergency":
@@ -163,20 +140,12 @@ def book_job(
     """Create the job record, mark the slot as booked, and update the customer's history.
     Only call this after the customer has confirmed the details and chosen a slot.
     materials_or_crew_notes: anything the contractor should bring or plan for (parts, extra crew)."""
-    customers = ds.load_customers()
-    match = customers.index[customers["customer_id"] == customer_id]
-    if not len(match):
+    db = store.get_store()
+    customer = db.get_customer(customer_id)
+    if not customer:
         return {"error": f"Unknown customer_id {customer_id}. Call collect_customer_info first."}
-    c_idx = match[0]
-    customer = customers.loc[c_idx]
-
-    schedule = ds.load_schedule()
-    s_match = schedule.index[schedule["slot_id"] == slot_id]
-    if not len(s_match):
+    if not db.get_slot(slot_id):
         return {"error": f"Unknown slot_id {slot_id}. Call check_availability for valid slots."}
-    s_idx = s_match[0]
-    if schedule.at[s_idx, "status"] != "available":
-        return {"error": f"Slot {slot_id} was just taken. Call check_availability again."}
 
     level = _normalize_urgency(urgency)
     notes = [n for n in [materials_or_crew_notes.strip()] if n]
@@ -184,37 +153,20 @@ def book_job(
     notes += [hint for key, hint in CREW_HINTS.items() if key in lowered and hint not in notes]
     if level == "emergency":
         notes.insert(0, "EMERGENCY")
-    is_vip = int(customer["total_jobs"] or 0) + 1 >= VIP_JOB_COUNT
-    if is_vip:
+    if int(customer["total_jobs"] or 0) + 1 >= VIP_JOB_COUNT:
         notes.append("VIP customer")
 
-    jobs = ds.load_jobs()
-    job_id = ds.next_id(jobs, "job_id", "J", 4)
-    today = ds.now().date().isoformat()
-    job = {
-        "job_id": job_id,
-        "customer_name": customer["name"],
-        "address": customer["address"],
-        "phone": customer["phone"],
-        "email": customer["email"],
-        "job_type": job_type,
-        "urgency": level,
-        "description": description,
-        "slot_id": slot_id,
-        "status": "pending_confirmation",
-        "created_date": today,
-        "notes": "; ".join(notes),
-    }
-    ds.save_jobs(pd.concat([jobs, pd.DataFrame([job])], ignore_index=True))
+    try:
+        job = db.book(
+            slot_id,
+            customer_id,
+            {"job_type": job_type, "urgency": level, "description": description, "notes": "; ".join(notes)},
+            today=ds.now().date().isoformat(),
+        )
+    except store.SlotUnavailable:
+        return {"error": f"Slot {slot_id} was just taken. Call check_availability again."}
 
-    schedule.loc[s_idx, ["status", "job_id"]] = ["booked", job_id]
-    ds.save_schedule(schedule)
-
-    customers.at[c_idx, "total_jobs"] = str(int(customer["total_jobs"] or 0) + 1)
-    customers.at[c_idx, "last_job_date"] = today
-    ds.save_customers(customers)
-
-    slot = schedule.loc[s_idx]
+    slot = db.get_slot(slot_id)
     return {
         "status": "booked",
         "job": job,
@@ -227,33 +179,24 @@ def book_job(
 def get_customer_history(phone_or_name: str) -> dict:
     """Return a customer's past jobs and whether they are a VIP (3+ jobs). Use this for returning
     customers so you can reference their previous work."""
-    customers = ds.load_customers()
-    idx = _find_customer(customers, phone=phone_or_name, name=phone_or_name)
-    jobs = ds.load_jobs()
+    db = store.get_store()
+    customer = db.find_customer(phone=phone_or_name, name=phone_or_name)
+    if not customer:
+        return {"found": False, "message": "No history for this customer."}
 
-    if idx is not None:
-        customer = customers.loc[idx]
-        digits = ds.normalize_phone(customer["phone"])
-        mask = (jobs["phone"].map(ds.normalize_phone) == digits) | (
-            jobs["customer_name"].str.lower() == customer["name"].lower()
-        )
-        past = jobs[mask]
-        total = max(int(customer["total_jobs"] or 0), len(past))
-        record = _customer_record(customer)
-    else:
-        past = jobs[jobs["customer_name"].str.lower() == phone_or_name.strip().lower()]
-        if past.empty:
-            return {"found": False, "message": "No history for this customer."}
-        record, total = {"name": past.iloc[0]["customer_name"]}, len(past)
-
+    past = db.jobs_for_customer(customer)
+    total = max(int(customer["total_jobs"] or 0), len(past))
     is_vip = total >= VIP_JOB_COUNT
     return {
         "found": True,
-        "customer": record,
+        "customer": _customer_record(customer),
         "total_jobs": total,
         "is_vip": is_vip,
         "vip_flag": "VIP - repeat client, prioritize and thank them for their loyalty" if is_vip else "",
-        "past_jobs": past[["job_id", "job_type", "description", "status", "created_date"]].to_dict("records"),
+        "past_jobs": [
+            {k: j[k] for k in ("job_id", "job_type", "description", "status", "created_date")}
+            for j in past
+        ],
     }
 
 
@@ -261,17 +204,13 @@ def get_customer_history(phone_or_name: str) -> dict:
 def generate_confirmation(job_id: str) -> dict:
     """Generate a ready-to-send SMS and email confirmation for a booked job. Call this right after
     book_job succeeds, then show the SMS text to the contractor."""
-    jobs = ds.load_jobs()
-    match = jobs.index[jobs["job_id"] == job_id]
-    if not len(match):
+    db = store.get_store()
+    job = db.get_job(job_id)
+    if not job:
         return {"error": f"Unknown job_id {job_id}."}
-    job = jobs.loc[match[0]]
-
-    schedule = ds.load_schedule()
-    slot = schedule[schedule["slot_id"] == job["slot_id"]]
-    if slot.empty:
+    slot = db.get_slot(job["slot_id"])
+    if not slot:
         return {"error": f"Job {job_id} has no valid slot."}
-    slot = slot.iloc[0]
 
     first_name = job["customer_name"].split()[0] if job["customer_name"] else "there"
     when = f"{_friendly_day(date.fromisoformat(slot['date']))} at {_friendly_time(slot['time'])}"
@@ -309,9 +248,7 @@ def generate_confirmation(job_id: str) -> dict:
 
 def mark_confirmation_sent(job_id: str) -> None:
     """Called from the UI once the contractor has sent the confirmation to the customer."""
-    jobs = ds.load_jobs()
-    jobs.loc[jobs["job_id"] == job_id, "status"] = "confirmed"
-    ds.save_jobs(jobs)
+    store.get_store().set_job_status(job_id, "confirmed")
 
 
 ALL_TOOLS = [
