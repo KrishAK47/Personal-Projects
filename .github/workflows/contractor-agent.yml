@@ -53,7 +53,9 @@ jobs:
               ("=" in k, "includes 'ANTHROPIC_API_KEY=' or another '='"),
               (not k.strip().strip("\"'").startswith("sk-ant-"), "does not start with sk-ant-"),
           ] if bad]
-          print(f"Key length {len(k)}, type prefix {k.strip()[:10]}")
+          summary = f"key length {len(k)}, type prefix {k.strip().strip(chr(34) + chr(39))[:10]}"
           if problems:
-              sys.exit("ANTHROPIC_API_KEY secret " + "; ".join(problems))
+              print(f"::error::ANTHROPIC_API_KEY secret {'; '.join(problems)} ({summary})")
+              sys.exit(1)
+          print(summary)
       - run: pytest -m eval -v -rs
