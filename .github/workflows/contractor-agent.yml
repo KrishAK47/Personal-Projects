@@ -41,4 +41,19 @@ jobs:
           cache: pip
           cache-dependency-path: Contractor-Front-Office-Agent/requirements*.txt
       - run: pip install -r requirements-dev.txt
+      - name: Check API key format (never prints the key)
+        if: env.ANTHROPIC_API_KEY != ''
+        shell: python
+        run: |
+          import os, sys
+          k = os.environ["ANTHROPIC_API_KEY"]
+          problems = [msg for bad, msg in [
+              (k != k.strip(), "has spaces or line breaks around it"),
+              (k[:1] in "\"'" or k[-1:] in "\"'", "is wrapped in quotes"),
+              ("=" in k, "includes 'ANTHROPIC_API_KEY=' or another '='"),
+              (not k.strip().strip("\"'").startswith("sk-ant-"), "does not start with sk-ant-"),
+          ] if bad]
+          print(f"Key length {len(k)}, type prefix {k.strip()[:10]}")
+          if problems:
+              sys.exit("ANTHROPIC_API_KEY secret " + "; ".join(problems))
       - run: pytest -m eval -v -rs
